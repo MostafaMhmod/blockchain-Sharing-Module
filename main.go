@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -6,10 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,53 +21,29 @@ import (
 
 // Block represents each 'item' in the blockchain
 type Block struct {
-	Index     int
-	Timestamp string
-	Hash      string
-	PrevHash  string
-	Data      string
+	Index      int
+	Timestamp  string
+	Hash       string
+	PrevHash   string
+	Data       string
+	ipfsHash   string
+	Difficulty int
+	Nonce      string
+}
+
+type Message struct {
+	Data     string
+	ipfsHash string
 }
 
 // Blockchain is a series of validated Blocks
 var Blockchain []Block
 
+const difficulty = 1
+
 // bcServer handles incoming concurrent Blocks
 var bcServer chan []Block
 var mutex = &sync.Mutex{}
-
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bcServer = make(chan []Block)
-
-	// create genesis block
-	t := time.Now()
-	genesisBlock := Block{0, t.String(), "", "", "Hello people"}
-	spew.Dump(genesisBlock)
-	Blockchain = append(Blockchain, genesisBlock)
-
-	httpPort := os.Getenv("PORT")
-
-	// start TCP and serve TCP server
-	server, err := net.Listen("tcp", ":"+httpPort)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("HTTP Server Listening on port :", httpPort)
-	defer server.Close()
-
-	for {
-		conn, err := server.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-		go handleConn(conn)
-	}
-
-}
 
 func handleConn(conn net.Conn) {
 
@@ -77,13 +55,10 @@ func handleConn(conn net.Conn) {
 
 	go func() {
 		for scanner.Scan() {
-			dta:= scanner.Text()
-			
-			newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], dta)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
+			dta := scanner.Text()
+
+			newBlock := generateBlock(Blockchain[len(Blockchain)-1], dta)
+
 			if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
 				newBlockchain := append(Blockchain, newBlock)
 				replaceChain(newBlockchain)
@@ -140,17 +115,15 @@ func replaceChain(newBlocks []Block) {
 	mutex.Unlock()
 }
 
-// SHA256 hasing
 func calculateHash(block Block) string {
-	record := string(block.Index) + block.Timestamp + block.PrevHash + block.Data
+	record := strconv.Itoa(block.Index) + block.Timestamp + block.PrevHash + block.Nonce + block.Data + block.ipfsHash
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
 	return hex.EncodeToString(hashed)
 }
 
-func generateBlock(oldBlock Block, data string) (Block, error) {
-
+func generateBlock(oldBlock Block, data string) Block {
 	var newBlock Block
 
 	t := time.Now()
@@ -158,9 +131,63 @@ func generateBlock(oldBlock Block, data string) (Block, error) {
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
 	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = calculateHash(newBlock)
+	newBlock.Difficulty = difficulty
 	newBlock.Data = data
+	newBlock.ipfsHash = data
 
+	for i := 0; ; i++ {
+		hex := fmt.Sprintf("%x", i)
+		newBlock.Nonce = hex
+		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
+			fmt.Println(calculateHash(newBlock), " do more work!")
+			time.Sleep(time.Second)
+			continue
+		} else {
+			fmt.Println(calculateHash(newBlock), " work done!")
+			newBlock.Hash = calculateHash(newBlock)
+			break
+		}
 
-	return newBlock, nil
+	}
+	return newBlock
+}
+
+func isHashValid(hash string, difficulty int) bool {
+	prefix := strings.Repeat("0", difficulty)
+	return strings.HasPrefix(hash, prefix)
+}
+
+func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bcServer = make(chan []Block)
+
+	// create genesis block
+	t := time.Now()
+	genesisBlock := Block{}
+	genesisBlock = Block{0, t.String(), calculateHash(genesisBlock), "", "", "", difficulty, ""}
+	spew.Dump(genesisBlock)
+	Blockchain = append(Blockchain, genesisBlock)
+
+	httpPort := os.Getenv("PORT")
+
+	// start TCP and serve TCP server
+	server, err := net.Listen("tcp", ":"+httpPort)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("HTTP Server Listening on port :", httpPort)
+	defer server.Close()
+
+	for {
+		conn, err := server.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		go handleConn(conn)
+	}
+
 }
