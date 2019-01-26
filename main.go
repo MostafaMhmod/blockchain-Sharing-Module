@@ -139,11 +139,10 @@ func generateBlock(oldBlock Block, data string) Block {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
-			fmt.Println(calculateHash(newBlock), " do more work!")
+			fmt.Println(calculateHash(newBlock), "calculating Nonce ")
 			time.Sleep(time.Second)
 			continue
 		} else {
-			fmt.Println(calculateHash(newBlock), " work done!")
 			newBlock.Hash = calculateHash(newBlock)
 			break
 		}
