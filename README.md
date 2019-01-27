@@ -25,7 +25,8 @@ For uploading any file or directory to the IPFS network, open a terminal window 
 over the file you wish to upload `ipfs add filesname.format` .
 this will upload our file to the network and gives us a hash which any other client can use it to download the file.
 
-Then we will start our blockchain by running `go run main.go`
+Then we will start our blockchain by running `go run main.go`.
+
 This will start our node , which then anyone can connect to it for sharing the files they uploaded to ipfs 
 
 for example using our local machine we can start a new terminal window and connect to the blockchain by running 
