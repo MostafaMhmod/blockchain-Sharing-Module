@@ -25,23 +25,16 @@ type Block struct {
 	Timestamp  string
 	Hash       string
 	PrevHash   string
-	Data       string
 	ipfsHash   string
 	Difficulty int
 	Nonce      string
 }
 
-type Message struct {
-	Data     string
-	ipfsHash string
-}
 
-// Blockchain is a series of validated Blocks
 var Blockchain []Block
 
 const difficulty = 1
 
-// bcServer handles incoming concurrent Blocks
 var bcServer chan []Block
 var mutex = &sync.Mutex{}
 
@@ -69,7 +62,6 @@ func handleConn(conn net.Conn) {
 		}
 	}()
 
-	// simulate receiving broadcast
 	go func() {
 		for {
 			time.Sleep(30 * time.Second)
@@ -89,7 +81,6 @@ func handleConn(conn net.Conn) {
 
 }
 
-// make sure block is valid by checking index, and comparing the hash of the previous block
 func isBlockValid(newBlock, oldBlock Block) bool {
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
@@ -106,7 +97,6 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 	return true
 }
 
-// make sure the chain we're checking is longer than the current blockchain
 func replaceChain(newBlocks []Block) {
 	mutex.Lock()
 	if len(newBlocks) > len(Blockchain) {
