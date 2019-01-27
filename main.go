@@ -42,7 +42,7 @@ func handleConn(conn net.Conn) {
 
 	defer conn.Close()
 
-	io.WriteString(conn, "Enter Data you would like to share:")
+	io.WriteString(conn, "Enter the IPFS Hash for the data which you would like to share:")
 
 	scanner := bufio.NewScanner(conn)
 
@@ -58,7 +58,7 @@ func handleConn(conn net.Conn) {
 			}
 
 			bcServer <- Blockchain
-			io.WriteString(conn, "\nEnter a new Data:")
+			io.WriteString(conn, "\nEnter the IPFS Hash for the data which you would like to share:")
 		}
 	}()
 
@@ -122,7 +122,6 @@ func generateBlock(oldBlock Block, data string) Block {
 	newBlock.Timestamp = t.String()
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Difficulty = difficulty
-	newBlock.Data = data
 	newBlock.ipfsHash = data
 
 	for i := 0; ; i++ {
