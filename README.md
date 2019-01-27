@@ -36,4 +36,5 @@ for example using our local machine we can start a new terminal window and conne
 This we will prompt us to enter our ipfs hash for the files we wish to share on the network .
 
 Later we can download the files uploaded to the ipfs nodes by running this command with the file hash.
+
 for example : `ipfs get QmUmcZDgPso7gcpa2iewYzJfXoGyjsvkVKeS3RM3hpjzQq`
