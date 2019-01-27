@@ -106,7 +106,7 @@ func replaceChain(newBlocks []Block) {
 }
 
 func calculateHash(block Block) string {
-	record := strconv.Itoa(block.Index) + block.Timestamp + block.PrevHash + block.Nonce + block.Data + block.ipfsHash
+	record := strconv.Itoa(block.Index) + block.Timestamp + block.PrevHash + block.Nonce  + block.ipfsHash
 	h := sha256.New()
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
