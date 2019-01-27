@@ -12,7 +12,9 @@ A simple implemntation of how a blockchain can be used for files Sharing over IP
 ## Building:
 First, setup the GOPATH environment variables to our project.
 Then install the dependencies for the project by running.
+
 `go get github.com/davecgh/go-spew/spew`
+
 `go get github.com/joho/godotenv`
 
 Then we will open a terminal window on which we will run IPFS daemon on it using `$ ipfs daemon`.
@@ -26,7 +28,8 @@ this will upload our file to the network and gives us a hash which any other cli
 Then we will start our blockchain by running `go run main.go`
 This will start our node , which then anyone can connect to it for sharing the files they uploaded to ipfs 
 
-for example using our local machine we can start a new terminal window and connect to the blockchain by running `nc localhost 9000`.
+for example using our local machine we can start a new terminal window and connect to the blockchain by running 
+`nc localhost 9000`.
 This we will prompt us to enter our ipfs hash for the files we wish to share on the network .
 
 Later we can download the files uploaded to the ipfs nodes by running this command with the file hash.
