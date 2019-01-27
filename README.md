@@ -30,7 +30,9 @@ Then we will start our blockchain by running `go run main.go`.
 This will start our node , which then anyone can connect to it for sharing the files they uploaded to ipfs 
 
 for example using our local machine we can start a new terminal window and connect to the blockchain by running 
+
 `nc localhost 9000`.
+
 This we will prompt us to enter our ipfs hash for the files we wish to share on the network .
 
 Later we can download the files uploaded to the ipfs nodes by running this command with the file hash.
